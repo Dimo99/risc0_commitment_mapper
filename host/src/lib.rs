@@ -21,9 +21,12 @@ use risc0_zkvm::{
 
 pub fn compute_shuffled_index(index: u64, index_count: u64, seed: &[u8; 32]) -> (Receipt, u64) {
     let env = ExecutorEnv::builder()
-        .add_input(&to_vec(&index).unwrap())
-        .add_input(&to_vec(&index_count).unwrap())
-        .add_input(&to_vec(seed).unwrap())
+        .write(&index)
+        .unwrap()
+        .write(&index_count)
+        .unwrap()
+        .write(&seed)
+        .unwrap()
         .build()
         .unwrap();
 
@@ -33,9 +36,12 @@ pub fn compute_shuffled_index(index: u64, index_count: u64, seed: &[u8; 32]) -> 
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover.prove_elf(env, COMPUTE_SHUFFLED_INDEX_ELF).unwrap();
+    let receipt = prover
+        .prove(env, COMPUTE_SHUFFLED_INDEX_ELF)
+        .unwrap()
+        .receipt;
 
-    let r = from_slice(&receipt.journal).expect(
+    let r: u64 = receipt.journal.decode().expect(
         "Journal output should deserialize into the same types (& order) that it was written",
     );
 
