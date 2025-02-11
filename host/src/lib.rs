@@ -12,23 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use methods::COMPUTE_SHUFFLED_INDEX_ELF;
+use methods::BENCH_SHA256_ELF;
 use risc0_zkvm::{
     default_prover,
     serde::{from_slice, to_vec},
     ExecutorEnv, Receipt,
 };
 
-pub fn compute_shuffled_index(index: u64, index_count: u64, seed: &[u8; 32]) -> (Receipt, u64) {
-    let env = ExecutorEnv::builder()
-        .write(&index)
-        .unwrap()
-        .write(&index_count)
-        .unwrap()
-        .write(&seed)
-        .unwrap()
-        .build()
-        .unwrap();
+pub fn bench_sha256(n: u64) -> Receipt {
+    let env = ExecutorEnv::builder().write(&n).unwrap().build().unwrap();
 
     // println!("po2 {:?}", env.segment_limit_po2);
 
@@ -36,17 +28,7 @@ pub fn compute_shuffled_index(index: u64, index_count: u64, seed: &[u8; 32]) -> 
     let prover = default_prover();
 
     // Produce a receipt by proving the specified ELF binary.
-    let receipt = prover
-        .prove(env, COMPUTE_SHUFFLED_INDEX_ELF)
-        .unwrap()
-        .receipt;
+    let receipt = prover.prove(env, BENCH_SHA256_ELF).unwrap().receipt;
 
-    let r: u64 = receipt.journal.decode().expect(
-        "Journal output should deserialize into the same types (& order) that it was written",
-    );
-
-    // println!("SEED IS {:?}", seed);
-    println!("The compute shuffled index is {}", r);
-
-    (receipt, r)
+    receipt
 }

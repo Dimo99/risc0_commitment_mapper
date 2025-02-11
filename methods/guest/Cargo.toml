@@ -1,5 +1,5 @@
 [package]
-name = "compute_shuffled_index"
+name = "bench_sha256"
 version = "0.1.0"
 edition = "2021"
 
